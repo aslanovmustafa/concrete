@@ -1,0 +1,80 @@
+auto <- read.table("auto-mpg.data", stringsAsFactors = FALSE)
+x <- c("mpg","cyl","disp","hp","weight","accel","year","origin","carname")
+names(auto) <- x
+auto.df <- auto[,1:7]
+carnames <- auto[,9]
+
+auto2 <- auto.df
+auto2$hp <- as.numeric(as.character(auto$hp))
+
+library(psych)
+auto.na <- na.omit(auto2)
+
+
+auto.na2 <- auto.na[,1:6]
+normalize <- function(x) { ((x-min(x)) / (max(x) - min(x))) }
+auto.norm <- as.data.frame(lapply(auto.na2[,1:6], normalize))
+
+
+auto.na2.k2 <- kmeans(auto.norm, centers = 2, nstart = 25)
+auto.na2.k3 <- kmeans(auto.norm, centers = 3, nstart = 25)
+auto.na2.k4 <- kmeans(auto.norm, centers = 4, nstart = 25)
+
+wssplot <- function(data, nc=15,seed=1234) {
+  wss <- (nrow(data)-1)* sum(apply(data,2,var))
+  for(i in 2:nc) {
+    set.seed(seed)
+    wss[i] <- sum(kmeans(data,centers = i)$withinss)
+  }
+  plot(1:nc,wss,type="b",xlab = "Number of clusters", ylab = "Within groups sum of squares")
+}
+
+wssplot(auto.na2,nc=4,seed = 12324)
+
+# auto <- read.table("auto-mpg.data", stringsAsFactors = FALSE)
+# 
+# x <- c("mpg","cyl","disp","hp","weight","accel","year","origin","carname")
+# 
+# names(auto) <- x
+# 
+# auto.df <- auto[,1:7]
+# 
+# carnames <- auto[,9]
+# 
+# auto2 <- auto.df
+# auto2$hp <- as.numeric(as.character(auto$hp))
+# 
+# auto.na <- na.omit(auto2)
+# 
+# auto.na2 <- auto.na[,1:6]
+# 
+# normalize <- function(x) { ((x-min(x)) / (max(x) - min(x))) }
+# 
+# auto.norm <- as.data.frame(lapply(auto.na2[,1:6], normalize))
+# 
+# zscore <- function(x) { (x - mean(x))/ sd(x) }
+# 
+# auto.znorm <- as.data.frame(lapply(auto.na2[,1:6],scale))
+# 
+# auto.na2.k2 <- kmeans(auto.norm, centers = 2, nstart = 25)
+# 
+# library(factoextra)
+# factoextra::fviz_cluster(auto.na2.k2,auto.na2)
+# 
+# auto.na2.k3 <- kmeans(auto.norm, centers = 3, nstart = 25)
+# auto.na2.k4 <- kmeans(auto.norm, centers = 4, nstart = 25)
+# factoextra::fviz_cluster(auto.na2.k4,auto.na2)
+# 
+# 
+# wssplot <- function(data, nc=15,seed=1234) {
+#   wss <- (nrow(data)-1)* sum(apply(data,2,var))
+#   for(i in 2:nc) {
+#     set.seed(seed)
+#     wss[i] <- sum(kmeans(data,centers = i)$withinss)
+#   }
+#   plot(1:nc,wss,type="b",xlab = "Number of clusters", ylab = "Within groups sum of squares")
+# }
+# 
+# wssplot(auto.na2,nc=4,seed = 12324)
+# 
+# factoextra::fviz_nbclust(auto.na2, FUNcluster = kmeans,print.summary = TRUE)
